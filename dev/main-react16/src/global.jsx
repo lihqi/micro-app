@@ -77,6 +77,12 @@ microApp.start({
   // getRootElementParentNode (node, appName) {
   //   return node.parentElement
   // },
+  customProxyDocumentProperties: {
+      title:{
+        // get: () => "get3333",
+        set: () => "set3333",
+      }
+  },
   lifeCycles: {
     created (e) {
       console.log('created 全局监听', 'name:', e.detail.name)
