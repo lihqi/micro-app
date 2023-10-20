@@ -196,16 +196,30 @@ function createProxyDocument (
       }]
     ])
     // external custom proxy
-    const customProxyDocumentProps = microApp.options?.customProxyDocumentProps || new Map()
+    let customProxyDocumentProps = null
+    if (microApp.options?.customProxyDocumentProps?.title?.set && isFunction(microApp.options?.customProxyDocumentProps?.title?.set)) {
+      customProxyDocumentProps = new Map([['title', microApp.options?.customProxyDocumentProps?.title?.set]])
+    } else {
+      customProxyDocumentProps = new Map()
+    }
+
     // External has higher priority than built-in
     const mergedProxyDocumentProps = new Map([
       ...builtInProxyProps,
       ...customProxyDocumentProps,
-    ]);
+    ])
     return mergedProxyDocumentProps
   }
 
-  const mergedProxyDocumentProps = genProxyDocumentProps();
+  const mergedProxyDocumentProps = genProxyDocumentProps()
+
+  const getDocumentTitle = () => {
+    if (microApp.options?.customProxyDocumentProps?.title?.get && isFunction(microApp.options?.customProxyDocumentProps?.title?.get)) {
+      return microApp.options?.customProxyDocumentProps?.title?.set() || rawDocument.title || ''
+    } else {
+      return rawDocument.title || ''
+    }
+  }
 
   const proxyDocument = new Proxy(rawDocument, {
     get: (target: Document, key: PropertyKey): unknown => {
@@ -218,6 +232,7 @@ function createProxyDocument (
       if (key === 'addEventListener') return addEventListener
       if (key === 'removeEventListener') return removeEventListener
       if (key === 'microAppElement') return appInstanceMap.get(appName)?.container
+      if (key === 'title') return getDocumentTitle()
       return bindFunctionToRawTarget<Document>(Reflect.get(target, key), rawDocument, 'DOCUMENT')
     },
     set: (target: Document, key: PropertyKey, value: unknown): boolean => {
