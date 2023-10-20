@@ -215,10 +215,14 @@ function createProxyDocument (
 
   const getDocumentTitle = () => {
     if (microApp.options?.customProxyDocumentProps?.title?.get && isFunction(microApp.options?.customProxyDocumentProps?.title?.get)) {
-      return microApp.options?.customProxyDocumentProps?.title?.set() || rawDocument.title || ''
-    } else {
-      return rawDocument.title || ''
+      return microApp.options?.customProxyDocumentProps?.title?.get() || rawDocument.title || ''
     }
+
+    if (microApp.options?.customProxyDocumentProps?.title?.set && isFunction(microApp.options?.customProxyDocumentProps?.title?.set)) {
+      return microApp.options?.customProxyDocumentProps?.title?.set() || rawDocument.title || ''
+    }
+
+    return rawDocument.title || ''
   }
 
   const proxyDocument = new Proxy(rawDocument, {
