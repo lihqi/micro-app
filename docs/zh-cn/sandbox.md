@@ -62,7 +62,7 @@ microApp.start({
 
 **解决方式**：
 
-*通过 customProxyDocumentProps 对 document 的属性进行自定义代理扩展*
+*通过 customProxyDocumentProperties 对 document 的属性进行自定义代理扩展*
 
 可以通过给`title`设置的`get`函数，来改变子应用`document.title`的取值。
 也可以通过给`title`设置的`set`一个空函数，来忽略子应用`document.title`执行.

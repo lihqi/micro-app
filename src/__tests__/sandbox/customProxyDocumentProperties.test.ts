@@ -8,13 +8,17 @@ const customDocumentOnClick = () => { console.log('会影响 microApp 内置对 
 describe('sandbox custom proxy document property', () => {
   let appCon: Element
   beforeAll(() => {
-    commonStartEffect(ports.custom_proxy_document)
-    
+    commonStartEffect(ports.custom_proxy_document_properties)
+
     microApp.start({
-      customProxyDocumentProps: new Map<string | number | symbol, () => void>([
-        ['title', () => {}], // 忽略 document.title 执行
-        ['onclick', customDocumentOnClick]
-      ]),
+      customProxyDocumentProperties: {
+        title: {
+          set(){
+            document.title = "title of micro-app environment"
+          }
+        },
+        onclick: customDocumentOnClick
+      }
     })
     appCon = document.querySelector('#app-container')!
   })
@@ -27,7 +31,7 @@ describe('sandbox custom proxy document property', () => {
   test('custom proxy document.title', async () => {
     const microAppElement1 = document.createElement('micro-app')
     microAppElement1.setAttribute('name', 'test-app1')
-    microAppElement1.setAttribute('url', `http://127.0.0.1:${ports.custom_proxy_document}/common/`)
+    microAppElement1.setAttribute('url', `http://127.0.0.1:${ports.custom_proxy_document_properties}/common/`)
 
     appCon.appendChild(microAppElement1)
 
@@ -52,7 +56,7 @@ describe('sandbox custom proxy document property', () => {
 
     const microAppElement2 = document.createElement('micro-app')
     microAppElement2.setAttribute('name', 'test-app2')
-    microAppElement2.setAttribute('url', `http://127.0.0.1:${ports.custom_proxy_document}/common/`)
+    microAppElement2.setAttribute('url', `http://127.0.0.1:${ports.custom_proxy_document_properties}/common/`)
 
     appCon.appendChild(microAppElement2)
 
