@@ -349,7 +349,7 @@ declare module '@micro-app/types' {
     globalAssets?: globalAssetsType,
     excludeAssetFilter?: (assetUrl: string) => boolean
     getRootElementParentNode?: (node: Node, appName: AppName) => void
-    customProxyDocumentProperties?: Record<string, any>
+    customProxyDocumentProps?: Record<string, any>
   }
 
   // MicroApp config

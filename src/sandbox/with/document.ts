@@ -196,30 +196,30 @@ function createProxyDocument (
       }]
     ])
     // external custom proxy
-    let customProxyDocumentProperties = null
-    if (microApp.options?.customProxyDocumentProperties?.title?.set && isFunction(microApp.options?.customProxyDocumentProperties?.title?.set)) {
-      customProxyDocumentProperties = new Map([['title', microApp.options?.customProxyDocumentProperties?.title?.set]])
+    let customProxyDocumentProps = null
+    if (microApp.options?.customProxyDocumentProps?.title?.set && isFunction(microApp.options?.customProxyDocumentProps?.title?.set)) {
+      customProxyDocumentProps = new Map([['title', microApp.options?.customProxyDocumentProps?.title?.set]])
     } else {
-      customProxyDocumentProperties = new Map()
+      customProxyDocumentProps = new Map()
     }
 
     // External has higher priority than built-in
     const mergedProxyDocumentProps = new Map([
       ...builtInProxyProps,
-      ...customProxyDocumentProperties,
+      ...customProxyDocumentProps,
     ])
     return mergedProxyDocumentProps
   }
 
-  const customProxyDocumentPropertiesMap = genProxyDocumentProps()
+  const customProxyDocumentPropsMap = genProxyDocumentProps()
 
   const getDocumentTitle = () => {
-    if (microApp.options?.customProxyDocumentProperties?.title?.get && isFunction(microApp.options?.customProxyDocumentProperties?.title?.get)) {
-      return microApp.options?.customProxyDocumentProperties?.title?.get() || rawDocument.title || ''
+    if (microApp.options?.customProxyDocumentProps?.title?.get && isFunction(microApp.options?.customProxyDocumentProps?.title?.get)) {
+      return microApp.options?.customProxyDocumentProps?.title?.get() || rawDocument.title || ''
     }
 
-    if (microApp.options?.customProxyDocumentProperties?.title?.set && isFunction(microApp.options?.customProxyDocumentProperties?.title?.set)) {
-      return microApp.options?.customProxyDocumentProperties?.title?.set() || rawDocument.title || ''
+    if (microApp.options?.customProxyDocumentProps?.title?.set && isFunction(microApp.options?.customProxyDocumentProps?.title?.set)) {
+      return microApp.options?.customProxyDocumentProps?.title?.set() || rawDocument.title || ''
     }
 
     return rawDocument.title || ''
@@ -240,8 +240,8 @@ function createProxyDocument (
       return bindFunctionToRawTarget<Document>(Reflect.get(target, key), rawDocument, 'DOCUMENT')
     },
     set: (target: Document, key: PropertyKey, value: unknown): boolean => {
-      if (customProxyDocumentPropertiesMap.has(key)) {
-        const proxyCallback = customProxyDocumentPropertiesMap.get(key)
+      if (customProxyDocumentPropsMap.has(key)) {
+        const proxyCallback = customProxyDocumentPropsMap.get(key)
         proxyCallback(value)
       } else if (key !== 'microAppElement') {
         /**

@@ -77,10 +77,14 @@ microApp.start({
   // getRootElementParentNode (node, appName) {
   //   return node.parentElement
   // },
-  customProxyDocumentProperties: {
+  customProxyDocumentProps: {
       title:{
-        // get: () => "get3333",
-        set: () => "set3333",
+        get:  () =>{
+          console.log("get 22222");
+        },
+        set: () =>{
+          console.log("set 11111");
+        },
       }
   },
   lifeCycles: {
