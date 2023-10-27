@@ -182,47 +182,24 @@ function createProxyDocument (
   }
 
   const genProxyDocumentProps = () => {
-    // microApp framework built-in Proxy
-    const builtInProxyProps = new Map([
-      ['onclick', (value: unknown) => {
-        if (isFunction(onClickHandler)) {
-          rawRemoveEventListener.call(rawDocument, 'click', onClickHandler, false)
-        }
-        // TODO: listener 是否需要绑定proxyDocument，否则函数中的this指向原生window
-        if (isFunction(value)) {
-          rawAddEventListener.call(rawDocument, 'click', value, false)
-        }
-        onClickHandler = value
-      }]
-    ])
-    // external custom proxy
-    let customProxyDocumentProps = null
-    if (microApp.options?.customProxyDocumentProps?.title?.set && isFunction(microApp.options?.customProxyDocumentProps?.title?.set)) {
-      customProxyDocumentProps = new Map([['title', microApp.options?.customProxyDocumentProps?.title?.set]])
-    } else {
-      customProxyDocumentProps = new Map()
-    }
-
-    // External has higher priority than built-in
-    const mergedProxyDocumentProps = new Map([
-      ...builtInProxyProps,
-      ...customProxyDocumentProps,
-    ])
-    return mergedProxyDocumentProps
+    // external custom proxy keys
+    return microApp.options.customProxyDocumentProps ? Object.keys(microApp.options.customProxyDocumentProps) : []
   }
-
   const customProxyDocumentPropsMap = genProxyDocumentProps()
 
-  const getDocumentTitle = () => {
-    if (microApp.options?.customProxyDocumentProps?.title?.get && isFunction(microApp.options?.customProxyDocumentProps?.title?.get)) {
-      return microApp.options?.customProxyDocumentProps?.title?.get() || rawDocument.title || ''
+  const getCustomProxyDocument = (key: string) => {
+    const proxySetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key].set
+    const proxyGetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key].get
+
+    if (proxyGetCallback && isFunction(proxyGetCallback)) {
+      return proxyGetCallback() || rawDocument[key]
     }
 
-    if (microApp.options?.customProxyDocumentProps?.title?.set && isFunction(microApp.options?.customProxyDocumentProps?.title?.set)) {
-      return microApp.options?.customProxyDocumentProps?.title?.set() || rawDocument.title || ''
+    if (proxySetCallback && isFunction(proxySetCallback)) {
+      return proxySetCallback() || rawDocument[key]
     }
 
-    return rawDocument.title || ''
+    return rawDocument[key]
   }
 
   const proxyDocument = new Proxy(rawDocument, {
@@ -236,13 +213,22 @@ function createProxyDocument (
       if (key === 'addEventListener') return addEventListener
       if (key === 'removeEventListener') return removeEventListener
       if (key === 'microAppElement') return appInstanceMap.get(appName)?.container
-      if (key === 'title') return getDocumentTitle()
+      if (customProxyDocumentPropsMap.includes(key as string)) return getCustomProxyDocument(key as string)
       return bindFunctionToRawTarget<Document>(Reflect.get(target, key), rawDocument, 'DOCUMENT')
     },
     set: (target: Document, key: PropertyKey, value: unknown): boolean => {
-      if (customProxyDocumentPropsMap.has(key)) {
-        const proxyCallback = customProxyDocumentPropsMap.get(key)
-        proxyCallback(value)
+      if (key === 'onclick') {
+        if (isFunction(onClickHandler)) {
+          rawRemoveEventListener.call(rawDocument, 'click', onClickHandler, false)
+        }
+        // TODO: listener 是否需要绑定proxyDocument，否则函数中的this指向原生window
+        if (isFunction(value)) {
+          rawAddEventListener.call(rawDocument, 'click', value, false)
+        }
+        onClickHandler = value
+      } else if (customProxyDocumentPropsMap.includes(key as string)) {
+        const proxySetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key as string].set
+        if (proxySetCallback && isFunction(proxySetCallback)) { proxySetCallback(value) }
       } else if (key !== 'microAppElement') {
         /**
          * 1. Fix TypeError: Illegal invocation when set document.title
