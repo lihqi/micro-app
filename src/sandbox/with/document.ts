@@ -13,9 +13,6 @@ import {
   rawDefineProperties,
 } from '../../libs/utils'
 import {
-  throttleDeferForParentNode,
-} from '../adapter'
-import {
   appInstanceMap,
 } from '../../create_app'
 import microApp from '../../micro_app'
@@ -205,7 +202,7 @@ function createProxyDocument (
   const proxyDocument = new Proxy(rawDocument, {
     get: (target: Document, key: PropertyKey): unknown => {
       throttleDeferForSetAppName(appName)
-      throttleDeferForParentNode(proxyDocument)
+      // TODO: 转换成数据形式，类似iframe的方式
       if (key === 'createElement') return createElement
       if (key === Symbol.toStringTag) return 'ProxyDocument'
       if (key === 'defaultView') return sandbox.proxyWindow
