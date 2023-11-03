@@ -78,6 +78,18 @@ microApp.start({
   //   return node.parentElement
   // },
   customProxyDocumentProps: {
+      characterSet:{
+        get:  () =>{
+          console.log("children 33333");
+          return "characterSet666"
+        },
+      },
+      children:{
+        get:  () =>{
+          console.log("children 33333");
+          return "children666"
+        },
+      },
       title:{
         get:  () =>{
           console.log("get 22222");

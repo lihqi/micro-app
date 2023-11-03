@@ -4,6 +4,7 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  console.log("tttttttttt", "==========>", "title", document.title, "children", document.children, "characterSet", document.characterSet);
   // const [open, setOpen] = useState(false);
 
   // const showDrawer = () => {
