@@ -5,6 +5,7 @@ import './App.css';
 
 function App() {
   console.log("tttttttttt", "==========>", "title", document.title, "children", document.children, "characterSet", document.characterSet);
+  document.title="vvvv"
   // const [open, setOpen] = useState(false);
 
   // const showDrawer = () => {

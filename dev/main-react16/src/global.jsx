@@ -80,7 +80,7 @@ microApp.start({
   customProxyDocumentProps: {
       characterSet:{
         get:  () =>{
-          console.log("children 33333");
+          console.log("children 4444");
           return "characterSet666"
         },
       },
@@ -94,8 +94,9 @@ microApp.start({
         get:  () =>{
           console.log("get 22222");
         },
-        set: () =>{
-          console.log("set 11111");
+        set: (value) =>{
+          console.log("set 11111",value);
+          return "title 99999"
         },
       }
   },

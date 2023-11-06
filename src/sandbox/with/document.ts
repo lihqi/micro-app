@@ -178,54 +178,60 @@ function createProxyDocument (
     }
   }
 
-  const genProxyDocumentProps = () => {
-    // external custom proxy keys
-    return microApp.options.customProxyDocumentProps ? Object.keys(microApp.options.customProxyDocumentProps) : []
+  // boolean key is included custom-proxy-document-props
+  const proxyDocumentPropsIncludeKey = (key: PropertyKey) => {
+    return !!(microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key])
   }
-  const customProxyDocumentPropsMap = genProxyDocumentProps()
 
-  const getCustomProxyDocument = (key: string) => {
+  // get value form custom-proxy-document-props by PropertyKey
+  const getCustomProxyDocumentValue = (key: PropertyKey) => {
     const proxySetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key].set
     const proxyGetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key].get
-
     if (proxyGetCallback && isFunction(proxyGetCallback)) {
       return proxyGetCallback() || rawDocument[key]
     }
-
     if (proxySetCallback && isFunction(proxySetCallback)) {
       return proxySetCallback() || rawDocument[key]
     }
-
     return rawDocument[key]
   }
 
+  // base-proxy-document-key-map is otherwise for custom-proxy-document-props
+  const baseProxyDocumentKeyMap: Record<string | symbol, ()=>void> = {
+    createElement: () => createElement,
+    defaultView: () => sandbox.proxyWindow,
+    onclick: () => onClickHandler,
+    addEventListener: () => addEventListener,
+    removeEventListener: () => removeEventListener,
+    microAppElement: () => appInstanceMap.get(appName)?.container,
+    [Symbol.toStringTag]: () => 'ProxyDocument'
+  }
+
+  // core proxy document
   const proxyDocument = new Proxy(rawDocument, {
     get: (target: Document, key: PropertyKey): unknown => {
       throttleDeferForSetAppName(appName)
       // TODO: 转换成数据形式，类似iframe的方式
-      if (key === 'createElement') return createElement
-      if (key === Symbol.toStringTag) return 'ProxyDocument'
-      if (key === 'defaultView') return sandbox.proxyWindow
-      if (key === 'onclick') return onClickHandler
-      if (key === 'addEventListener') return addEventListener
-      if (key === 'removeEventListener') return removeEventListener
-      if (key === 'microAppElement') return appInstanceMap.get(appName)?.container
-      if (customProxyDocumentPropsMap.includes(key as string)) return getCustomProxyDocument(key as string)
+      if (baseProxyDocumentKeyMap[key]) return baseProxyDocumentKeyMap[key]()
+      if (proxyDocumentPropsIncludeKey(key)) return getCustomProxyDocumentValue(key)
       return bindFunctionToRawTarget<Document>(Reflect.get(target, key), rawDocument, 'DOCUMENT')
     },
     set: (target: Document, key: PropertyKey, value: unknown): boolean => {
-      if (key === 'onclick') {
-        if (isFunction(onClickHandler)) {
-          rawRemoveEventListener.call(rawDocument, 'click', onClickHandler, false)
+      if (proxyDocumentPropsIncludeKey(key) || key === 'onclick') {
+        // onclick need special handle
+        if (key === 'onclick') {
+          if (isFunction(onClickHandler)) {
+            rawRemoveEventListener.call(rawDocument, 'click', onClickHandler, false)
+          }
+          // TODO: listener 是否需要绑定proxyDocument，否则函数中的this指向原生window
+          if (isFunction(value)) {
+            rawAddEventListener.call(rawDocument, 'click', value, false)
+          }
+          onClickHandler = value
+        } else {
+          const proxySetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key].set
+          if (proxySetCallback && isFunction(proxySetCallback)) { proxySetCallback(value) }
         }
-        // TODO: listener 是否需要绑定proxyDocument，否则函数中的this指向原生window
-        if (isFunction(value)) {
-          rawAddEventListener.call(rawDocument, 'click', value, false)
-        }
-        onClickHandler = value
-      } else if (customProxyDocumentPropsMap.includes(key as string)) {
-        const proxySetCallback = microApp.options.customProxyDocumentProps && microApp.options.customProxyDocumentProps[key as string].set
-        if (proxySetCallback && isFunction(proxySetCallback)) { proxySetCallback(value) }
       } else if (key !== 'microAppElement') {
         /**
          * 1. Fix TypeError: Illegal invocation when set document.title
