@@ -80,23 +80,24 @@ microApp.start({
   customProxyDocumentProps: {
       characterSet:{
         get:  () =>{
-          console.log("children 4444");
-          return "characterSet666"
+          console.log("customProxyDocumentProps + characterSet");
+          return "主应用设置的characterSet"
         },
       },
       children:{
         get:  () =>{
-          console.log("children 33333");
-          return "children666"
+          console.log("customProxyDocumentProps + children");
+          return "主应用返回的children"
         },
       },
       title:{
         get:  () =>{
-          console.log("get 22222");
+          console.log("customProxyDocumentProps + title + get");
+          return "主应用返回的title"
         },
         set: (value) =>{
-          console.log("set 11111",value);
-          return "title 99999"
+          console.log("customProxyDocumentProps + title + set",value);
+          return "主应用设置的title"
         },
       }
   },
