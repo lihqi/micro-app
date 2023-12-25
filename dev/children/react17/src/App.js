@@ -1,6 +1,9 @@
 import React from 'react'
 // import { Button, Drawer } from 'antd';
 import logo from './logo.svg';
+import MapT from './Map_T';
+import MapB from './Map_B';
+import MapG from './Map_G';
 import './App.css';
 
 function App() {
@@ -44,6 +47,9 @@ function App() {
         <p>Some contents...</p>
         <p>Some contents...</p>
       </Drawer> */}
+      <MapT/>
+      <MapB/>
+      <MapG/>
     </div>
   );
 }

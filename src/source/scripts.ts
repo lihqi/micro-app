@@ -155,6 +155,9 @@ export function extractScriptElement (
   let replaceComment: Comment | null = null
   let src: string | null = script.getAttribute('src')
   if (src) src = CompletionPath(src, app.url)
+
+  // console.log(666,"script.getAttribute('src')",script.getAttribute('src'),"============",src,"{{{{{{{{{{{{{{{{", script.hasAttribute('exclude') || checkExcludeUrl(src, app.name))
+
   if (script.hasAttribute('exclude') || checkExcludeUrl(src, app.name)) {
     replaceComment = document.createComment('script element with exclude attribute removed by micro-app')
   } else if (

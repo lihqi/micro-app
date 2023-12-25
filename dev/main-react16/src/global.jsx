@@ -1,6 +1,7 @@
 import 'babel-polyfill'
 import microApp, { unmountApp, unmountAllApps } from '@micro-zoe/micro-app'
 import config from './config'
+import microPluginMap from '@zero/micro-plugin-map';
 
 const prefetchConfig = [
   {
@@ -51,9 +52,54 @@ const prefetchConfig = [
 ]
 
 // microApp.preFetch(prefetchConfig)
-
 window['scopeKeySpe'] = 'value from base app'
 window.Vue = { tip: 'Vue from base' }
+
+
+// SDK
+const MAPS_ARR_SDK = [
+  //  // 百度MAP_SDK
+  "//api.map.baidu.com",
+
+  // 腾讯MAP_SDK
+  "//map.qq.com/api/gljs",
+
+  // // 高德MAP_SDK
+  // "//webapi.amap.com/maps",
+]
+
+// JSONP
+const MAPS_ARR_JSONP = [
+   // 百度MAP
+  'map.baidu.com',
+  'dlswbr.baidu.com',
+  'hm.baidu.com',
+  "maponline0.bdimg.com",
+
+  // 腾讯MAP
+  'apikey.map.qq.com',
+  'confinfo.map.qq.com',
+  'overseactrl.map.qq.com',
+]
+
+
+/**
+ * 如果函数返回 `true` 则忽略 script 和 link 标签的创建
+ * @param {string} url
+ * @returns boolean
+ */
+function MapExcludeCheckerHandler(url) {
+  return MAPS_ARR_SDK.some((item) => url.includes(item));
+}
+
+/**
+ * 如果函数返回 `true` ，则 micro-app 不会处理它，元素将原封不动进行渲染
+ * @param {string} url
+ * @returns boolean
+ */
+function MapIgnoreCheckerHandler(url) {
+  return [...MAPS_ARR_SDK,...MAPS_ARR_JSONP].some((item) => url.includes(item));
+}
 
 microApp.start({
   // shadowDOM: true,
@@ -134,10 +180,13 @@ microApp.start({
         escapeProperties: ['escapeKey1', 'escapeKey2'],
         options: {a: 1,},
         loader(code, url, options) {
-          // console.log('vue2插件', url, options)
+          // console.log('vue2插件+++++++++++++>>>>>>>>>>>>>', code, url, options)
           return code
         }
-      }
+      },
+      {
+        ...microPluginMap
+     }
     ],
     modules: {
       react16: [{
@@ -161,7 +210,7 @@ microApp.start({
       }],
       vite2: [{
         escapeProperties: ['escapeKey3', 'escapeKey4'],
-      }],
+      }]
     }
   },
   /**
