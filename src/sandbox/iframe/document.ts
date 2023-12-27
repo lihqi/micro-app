@@ -11,6 +11,7 @@ import {
   logWarn,
   isUniqueElement,
   isInvalidQuerySelectorKey,
+  throttleDeferForSetAppName,
 } from '../../libs/utils'
 import globalEnv from '../../libs/global_env'
 import bindFunctionToRawTarget from '../bind_function'
@@ -278,6 +279,7 @@ function patchDocumentProperty (
       enumerable: true,
       configurable: true,
       get: () => {
+        throttleDeferForSetAppName(appName)
         if (customProxyDocumentPropsMap.includes(tagName)) {
           return getCustomProxyDocument(tagName)
         } else {
