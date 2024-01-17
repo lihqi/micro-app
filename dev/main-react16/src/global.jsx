@@ -77,30 +77,7 @@ microApp.start({
   // getRootElementParentNode (node, appName) {
   //   return node.parentElement
   // },
-  customProxyDocumentProps: {
-      characterSet:{
-        get:  () =>{
-          console.log("customProxyDocumentProps + characterSet");
-          return "主应用设置的characterSet"
-        },
-      },
-      children:{
-        get:  () =>{
-          console.log("customProxyDocumentProps + children");
-          return "主应用返回的children"
-        },
-      },
-      title:{
-        get:  () =>{
-          console.log("customProxyDocumentProps + title + get");
-          return "主应用返回的title"
-        },
-        set: (value) =>{
-          console.log("customProxyDocumentProps + title + set",value);
-          return "主应用设置的title"
-        },
-      }
-  },
+  // iframeSrc: 'http://localhost:3000/',
   lifeCycles: {
     created (e) {
       console.log('created 全局监听', 'name:', e.detail.name)

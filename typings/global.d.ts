@@ -213,6 +213,8 @@ declare module '@micro-app/types' {
     // get keep-alive state
     getKeepAliveState(): string | null
 
+    getDOMParser(): DOMParser
+
     // is app unmounted
     isUnmounted (): boolean
 
@@ -344,6 +346,7 @@ declare module '@micro-app/types' {
     fiber?: boolean
     prefetchLevel?: number
     prefetchDelay?: number
+    iframeSrc?: string
   }
 
   interface OptionsType extends MicroAppConfig {
